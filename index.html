@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Traffic Incident Reporter</title>
+    <!-- Stylesheet Link -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- HEADER & NAVIGATION SECTION               -->
+    <!-- ========================================== -->
+    <header class="header">
+        <div class="nav-container">
+            <!-- Project Title / Brand Name -->
+            <div class="logo" onclick="showView('dashboardView')" style="cursor: pointer;">
+                <span class="logo-icon">🚦</span>
+                <span class="logo-text">Smart Traffic Incident Reporter</span>
+            </div>
+
+            <!-- Mobile Hamburger Menu Button -->
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation Menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+
+            <!-- Navigation Links -->
+            <nav class="nav-links" id="navLinks">
+                <a href="#dashboard" class="nav-item active" id="navDashboard" onclick="showView('dashboardView')">Dashboard</a>
+                <a href="#report-incident" class="nav-item" id="navReportIncident" onclick="showView('reportIncidentView')">Report Incident</a>
+                <a href="#report-pothole" class="nav-item" id="navReportPothole" onclick="showView('reportPotholeView')">Report Pothole</a>
+                <a href="#view-reports" class="nav-item" id="navViewReports" onclick="showView('viewReportsView')">View Reports</a>
+                <a href="#incident-map" class="nav-item" id="navIncidentMap" onclick="showView('incidentMapView')">Incident Map</a>
+                <a href="#admin" class="nav-item" id="navAdmin" onclick="showView('adminDashboardView')">Admin</a>
+                <!-- Module 8 Auth Navigation -->
+                <span id="navUserInfo" class="nav-user-info hidden" style="font-size: 0.85rem; color: #ffffff; background: rgba(255,255,255,0.15); padding: 0.25rem 0.6rem; border-radius: 6px; margin-left: 0.5rem; align-self: center;"></span>
+                <button type="button" id="navLoginBtn" class="btn btn-secondary" onclick="openAuthModal('userLogin')" style="padding: 0.35rem 0.8rem; font-size: 0.85rem; margin-left: 0.5rem;">🔑 Login</button>
+                <button type="button" id="navLogoutBtn" class="btn btn-outline hidden" onclick="handleLogout()" style="padding: 0.35rem 0.8rem; font-size: 0.85rem; margin-left: 0.5rem; color: #ffffff; border-color: rgba(255,255,255,0.5);">🚪 Logout</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- MAIN CONTENT AREA                          -->
+    <!-- ========================================== -->
+    <main class="main-container">
+
+        <!-- ====================================== -->
+        <!-- VIEW 1: DASHBOARD (MODULE 1 & 7)       -->
+        <!-- ====================================== -->
+        <div id="dashboardView" class="view-section">
+            
+            <!-- 1. WELCOME / HERO SECTION -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Smart Traffic Incident Reporter</h1>
+                    <p class="hero-description">
+                        Report traffic incidents and road problems quickly and help improve road safety across your city.
+                    </p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" onclick="showView('reportIncidentView')">
+                            🚨 Report an Incident
+                        </button>
+                        <button class="btn btn-secondary" onclick="showView('reportPotholeView')">
+                            🕳️ Report Pothole
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. STATISTICS CARDS SECTION -->
+            <section class="stats-section">
+                <h2 class="section-title">Overview Statistics</h2>
+                <div class="stats-grid">
+                    
+                    <!-- Card 1: Total Reports -->
+                    <div class="stat-card total-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total Reports</span>
+                            <span class="stat-value" id="statTotal">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Pending Reports -->
+                    <div class="stat-card pending-card">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Pending Reports</span>
+                            <span class="stat-value" id="statPending">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Verified Reports -->
+                    <div class="stat-card verified-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Verified Reports</span>
+                            <span class="stat-value" id="statVerified">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Resolved Reports -->
+                    <div class="stat-card resolved-card">
+                        <div class="stat-icon">🎉</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Resolved Reports</span>
+                            <span class="stat-value" id="statResolved">0</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Priority Breakdown Metrics (Module 7) -->
+                <div class="stats-grid" style="margin-top: 1rem;">
+                    <div class="stat-card" style="border-left: 4px solid var(--priority-high);">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-info">
+                            <span class="stat-label">High Priority</span>
+                            <span class="stat-value" id="statHighPriority">0</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" style="border-left: 4px solid var(--priority-medium);">
+                        <div class="stat-icon">⚠️</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Medium Priority</span>
+                            <span class="stat-value" id="statMediumPriority">0</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" style="border-left: 4px solid var(--accent-blue);">
+                        <div class="stat-icon">ℹ️</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Low Priority</span>
+                            <span class="stat-value" id="statLowPriority">0</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODULE 9: NOTIFICATIONS & ALERTS SECTION -->
+            <section class="notifications-section">
+                <div class="notifications-header">
+                    <h2 class="section-title" style="margin-bottom: 0;">🔔 Notifications & Action Alerts</h2>
+                    <span class="notification-badge" id="notifBadgeCount">0</span>
+                </div>
+                <div id="notificationsContainer" class="notifications-list">
+                    <!-- Dynamic Notifications Rendered via JavaScript -->
+                </div>
+            </section>
+
+            <!-- 3. RECENT REPORTS SECTION -->
+            <section class="recent-reports-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <h2 class="section-title" style="margin-bottom: 0;">Recent Incident Reports (Latest 5)</h2>
+                    <button class="btn btn-secondary" onclick="showView('viewReportsView')" style="padding: 0.45rem 0.9rem; font-size: 0.85rem;">
+                        📋 View All Reports &rarr;
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Incident ID</th>
+                                <th>Type</th>
+                                <th>Location</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentReportsBody">
+                            <!-- Dynamic Content Rendered via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 1rem; text-align: right;">
+                    <button class="btn btn-secondary" onclick="showView('viewReportsView')" style="padding: 0.45rem 0.9rem; font-size: 0.85rem;">
+                        📋 View All Reports &rarr;
+                    </button>
+                </div>
+            </section>
+
+            <!-- 4. QUICK ACTIONS SECTION -->
+            <section class="quick-actions-section">
+                <h2 class="section-title">Quick Actions</h2>
+                <div class="quick-actions-grid">
+                    <button class="action-btn" onclick="showView('reportIncidentView')">
+                        <span class="action-icon">🚨</span>
+                        <span class="action-text">Report Traffic Incident</span>
+                    </button>
+                    <button class="action-btn" onclick="showView('reportPotholeView')">
+                        <span class="action-icon">🕳️</span>
+                        <span class="action-text">Report Pothole</span>
+                    </button>
+                    <button class="action-btn" onclick="showView('viewReportsView')">
+                        <span class="action-icon">📋</span>
+                        <span class="action-text">View All Reports</span>
+                    </button>
+                    <button class="action-btn" onclick="showView('incidentMapView')">
+                        <span class="action-icon">🗺️</span>
+                        <span class="action-text">View Incident Map</span>
+                    </button>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- ====================================== -->
+        <!-- VIEW 2: REPORT INCIDENT (MODULE 2)     -->
+        <!-- ====================================== -->
+        <div id="reportIncidentView" class="view-section hidden">
+            
+            <div class="form-header">
+                <div>
+                    <h2 class="form-title">🚨 Report Traffic Incident</h2>
+                    <p class="form-subtitle">Fill in the details below to submit a new traffic incident report.</p>
+                </div>
+                <button class="btn btn-outline" onclick="showView('dashboardView')">
+                    ← Back to Dashboard
+                </button>
+            </div>
+
+            <div id="formErrorMessage" class="alert alert-error hidden"></div>
+
+            <div id="formSuccessMessage" class="alert alert-success hidden">
+                <div class="success-icon">✅</div>
+                <div class="success-content">
+                    <h3>Incident Reported Successfully!</h3>
+                    <p>Your incident report has been registered in the system.</p>
+                    <p class="success-id-text">Your Incident ID is: <strong id="generatedIdDisplay">INC001</strong></p>
+                    <div class="success-actions">
+                        <button class="btn btn-primary" onclick="resetFormView()">Submit Another Report</button>
+                        <button class="btn btn-secondary" onclick="showView('dashboardView')">Back to Dashboard</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-card" id="formCard">
+                <form id="incidentForm" onsubmit="handleIncidentSubmit(event)" novalidate>
+                    
+                    <div class="form-grid">
+                        
+                        <div class="form-group">
+                            <label for="incidentType">Incident Type <span class="required">*</span></label>
+                            <select id="incidentType" required>
+                                <option value="" disabled selected>-- Select Incident Type --</option>
+                                <option value="Accident">Accident</option>
+                                <option value="Traffic Jam">Traffic Jam</option>
+                                <option value="Road Blockage">Road Blockage</option>
+                                <option value="Traffic Signal Failure">Traffic Signal Failure</option>
+                                <option value="Vehicle Breakdown">Vehicle Breakdown</option>
+                                <option value="Waterlogging">Waterlogging</option>
+                                <option value="Fire">Fire</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="incidentLocation">Location / Area <span class="required">*</span></label>
+                            <input type="text" id="incidentLocation" placeholder="e.g., Anna Nagar, Mount Road" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="incidentSeverity">Severity Level <span class="required">*</span></label>
+                            <select id="incidentSeverity" required>
+                                <option value="" disabled selected>-- Select Severity --</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="vehiclesAffected">Vehicles Affected <span class="required">*</span></label>
+                            <input type="number" id="vehiclesAffected" min="0" value="0" placeholder="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="incidentDate">Date of Incident <span class="required">*</span></label>
+                            <input type="date" id="incidentDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="incidentTime">Time of Incident <span class="required">*</span></label>
+                            <input type="time" id="incidentTime" required>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="incidentDescription">Incident Description <span class="required">*</span></label>
+                        <textarea id="incidentDescription" rows="4" placeholder="Provide details about what happened..." required></textarea>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-submit">
+                            🚀 Submit Report
+                        </button>
+                        <button type="button" class="btn btn-cancel" onclick="showView('dashboardView')">
+                            Cancel / Back to Dashboard
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+
+        <!-- ====================================== -->
+        <!-- VIEW 3: REPORT POTHOLE (MODULE 3)      -->
+        <!-- ====================================== -->
+        <div id="reportPotholeView" class="view-section hidden">
+            
+            <div class="form-header">
+                <div>
+                    <h2 class="form-title">🕳️ Report Road Pothole</h2>
+                    <p class="form-subtitle">Capture a photo of the road pothole using your device camera and submit evidence.</p>
+                </div>
+                <button class="btn btn-outline" onclick="showView('dashboardView')">
+                    ← Back to Dashboard
+                </button>
+            </div>
+
+            <div id="potholeErrorMessage" class="alert alert-error hidden"></div>
+
+            <div id="potholeSuccessMessage" class="alert alert-success hidden">
+                <div class="success-icon">✅</div>
+                <div class="success-content">
+                    <h3>Pothole Reported Successfully!</h3>
+                    <p>Your pothole report has been submitted and is currently pending verification.</p>
+                    <p class="success-id-text">Your Pothole ID is: <strong id="generatedPotholeIdDisplay">POT002</strong></p>
+                    <p style="margin-top: 0.25rem; font-size: 0.9rem;">Status: <span class="badge status-pending">Pending Verification</span></p>
+                    <div class="success-actions">
+                        <button class="btn btn-primary" onclick="resetPotholeFormView()">Submit Another Pothole Report</button>
+                        <button class="btn btn-secondary" onclick="showView('dashboardView')">Back to Dashboard</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-card" id="potholeFormCard">
+                <form id="potholeForm" onsubmit="handlePotholeSubmit(event)" novalidate>
+                    
+                    <div class="form-grid">
+                        
+                        <div class="form-group">
+                            <label for="potholeLocation">Location / Street Address <span class="required">*</span></label>
+                            <input type="text" id="potholeLocation" placeholder="e.g., Guindy 10th Main Road" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="potholeDate">Date <span class="required">*</span></label>
+                            <input type="date" id="potholeDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="potholeTime">Time <span class="required">*</span></label>
+                            <input type="time" id="potholeTime" required>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="potholeDescription">Description of Pothole <span class="required">*</span></label>
+                        <textarea id="potholeDescription" rows="3" placeholder="Describe the size, depth, or danger posed by the pothole..." required></textarea>
+                    </div>
+
+                    <div class="camera-section">
+                        <h3 class="camera-title">📷 Capture Pothole Evidence</h3>
+                        <p class="camera-subtitle">Open your device camera, align the pothole in view, and capture a photo.</p>
+                        
+                        <div id="cameraErrorAlert" class="alert alert-error hidden"></div>
+
+                        <div class="video-container hidden" id="videoContainer">
+                            <video id="cameraVideo" autoplay playsinline></video>
+                        </div>
+
+                        <canvas id="photoCanvas" class="hidden"></canvas>
+
+                        <div id="photoPreviewContainer" class="photo-preview-container hidden">
+                            <img id="photoPreview" alt="Captured Pothole Photo Preview">
+                            <div class="photo-badge-label">📸 Photo Captured Successfully</div>
+                        </div>
+
+                        <div class="camera-buttons">
+                            <button type="button" id="openCameraBtn" class="btn btn-primary" onclick="startCamera()">
+                                📷 Open Camera
+                            </button>
+                            <button type="button" id="capturePhotoBtn" class="btn btn-submit hidden" onclick="capturePhoto()">
+                                📸 Capture Photo
+                            </button>
+                            <button type="button" id="retakePhotoBtn" class="btn btn-secondary hidden" onclick="retakePhoto()">
+                                🔄 Retake Photo
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-submit">
+                            🚀 Submit Pothole Report
+                        </button>
+                        <button type="button" class="btn btn-cancel" onclick="showView('dashboardView')">
+                            Cancel / Back to Dashboard
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+
+        <!-- ====================================== -->
+        <!-- VIEW 4: VIEW ALL REPORTS (MODULE 4 & 7)-->
+        <!-- ====================================== -->
+        <div id="viewReportsView" class="view-section hidden">
+            
+            <div class="form-header">
+                <div>
+                    <h2 class="form-title">📋 View & Manage All Reports</h2>
+                    <p class="form-subtitle">Browse, search, filter, edit, or delete submitted traffic incident and pothole reports.</p>
+                </div>
+                <button class="btn btn-outline" onclick="showView('dashboardView')">
+                    ← Back to Dashboard
+                </button>
+            </div>
+
+            <div id="viewReportsNotification" class="alert alert-success hidden"></div>
+
+            <div class="reports-toolbar">
+                <div class="search-box">
+                    <input type="text" id="reportSearchInput" placeholder="🔍 Search by ID, type, or location..." oninput="filterAndRenderReports()">
+                </div>
+                <div class="filter-box">
+                    <label for="reportFilterSelect" class="filter-label">Category:</label>
+                    <select id="reportFilterSelect" onchange="filterAndRenderReports()">
+                        <option value="all">All Reports</option>
+                        <option value="incidents">Traffic Incidents Only</option>
+                        <option value="potholes">Pothole Reports Only</option>
+                    </select>
+                </div>
+                <!-- Priority Filter Dropdown (Module 7) -->
+                <div class="filter-box">
+                    <label for="reportPriorityFilterSelect" class="filter-label">Priority:</label>
+                    <select id="reportPriorityFilterSelect" onchange="filterAndRenderReports()">
+                        <option value="all">All Priorities</option>
+                        <option value="High">🔥 High Priority</option>
+                        <option value="Medium">⚠️ Medium Priority</option>
+                        <option value="Low">ℹ️ Low Priority</option>
+                    </select>
+                </div>
+                <!-- Export & Print Actions (Module 10 & 11) -->
+                <div class="toolbar-actions">
+                    <button type="button" class="btn btn-export-csv" onclick="exportReportsToCSV()">
+                        📥 Export CSV
+                    </button>
+                    <button type="button" class="btn btn-print-reports" onclick="printFilteredReports()">
+                        🖨️ Print Reports
+                    </button>
+                </div>
+            </div>
+
+            <div id="reportsContainer" class="reports-grid">
+                <!-- Dynamic Content Rendered via JavaScript -->
+            </div>
+
+        </div>
+
+        <!-- ====================================== -->
+        <!-- VIEW 5: ADMIN DASHBOARD (MODIFIED)     -->
+        <!-- ====================================== -->
+        <div id="adminDashboardView" class="view-section hidden">
+            
+            <div class="form-header">
+                <div>
+                    <h2 class="form-title">🛠️ Admin Dashboard</h2>
+                    <p class="form-subtitle">Comprehensive management for ALL reports: verify authenticity (TRUE / FALSE), edit, delete, and track resolution workflows.</p>
+                </div>
+                <button class="btn btn-outline" onclick="showView('dashboardView')">
+                    ← Back to Dashboard
+                </button>
+            </div>
+
+            <div id="adminNotification" class="alert alert-success hidden"></div>
+
+            <section class="stats-section">
+                <h2 class="section-title">Admin Overview Statistics</h2>
+                <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total Reports</span>
+                            <span class="stat-value" id="adminStatTotal">0</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🚨</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Traffic Incidents</span>
+                            <span class="stat-value" id="adminStatIncidents">0</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🕳️</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Potholes</span>
+                            <span class="stat-value" id="adminStatPotholes">0</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" style="border-left: 4px solid var(--status-pending);">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Pending Verification</span>
+                            <span class="stat-value" id="adminStatPending">0</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" style="border-left: 4px solid var(--status-verified);">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Verified Reports</span>
+                            <span class="stat-value" id="adminStatVerified">0</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" style="border-left: 4px solid var(--status-false);">
+                        <div class="stat-icon">✕</div>
+                        <div class="stat-info">
+                            <span class="stat-label">False Reports</span>
+                            <span class="stat-value" id="adminStatFalse">0</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card" style="border-left: 4px solid var(--status-resolved);">
+                        <div class="stat-icon">🎉</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Resolved / Corrected</span>
+                            <span class="stat-value" id="adminStatResolved">0</span>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="map-toolbar" style="margin-top: 1.5rem;">
+                <div class="map-filter-buttons" id="adminFilterContainer">
+                    <button type="button" class="map-filter-btn active" id="adminFilterAll" onclick="filterAdminReports('all')">All Reports</button>
+                    <button type="button" class="map-filter-btn" id="adminFilterIncidents" onclick="filterAdminReports('incidents')">🚨 Traffic Incidents</button>
+                    <button type="button" class="map-filter-btn" id="adminFilterPotholes" onclick="filterAdminReports('potholes')">🕳️ Potholes</button>
+                    <button type="button" class="map-filter-btn" id="adminFilterPending" onclick="filterAdminReports('pending')">⏳ Pending</button>
+                    <button type="button" class="map-filter-btn" id="adminFilterVerified" onclick="filterAdminReports('verified')">✅ Verified</button>
+                    <button type="button" class="map-filter-btn" id="adminFilterFalse" onclick="filterAdminReports('false')">✕ False Reports</button>
+                    <button type="button" class="map-filter-btn" id="adminFilterResolved" onclick="filterAdminReports('resolved')">🎉 Resolved</button>
+                </div>
+            </div>
+
+            <section class="admin-section">
+                <h2 class="section-title">📋 Admin Management - All Reports</h2>
+                <p class="admin-section-sub">Verify, manage status workflows, edit, or delete any reported incident in the system.</p>
+                <div id="adminReportsContainer" class="reports-grid">
+                    <!-- Dynamic Content Rendered via JavaScript -->
+                </div>
+            </section>
+
+        </div>
+
+        <!-- ====================================== -->
+        <!-- VIEW 6: INCIDENT MAP (MODULE 6 & 7)    -->
+        <!-- ====================================== -->
+        <div id="incidentMapView" class="view-section hidden">
+            
+            <div class="form-header">
+                <div>
+                    <h2 class="form-title">🗺️ Incident Map Visualization</h2>
+                    <p class="form-subtitle">Visual city road layout showing live traffic incidents and pothole locations.</p>
+                </div>
+                <button class="btn btn-outline" onclick="showView('dashboardView')">
+                    ← Back to Dashboard
+                </button>
+            </div>
+
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total Reports</span>
+                            <span class="stat-value" id="mapStatTotal">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🚨</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Traffic Incidents</span>
+                            <span class="stat-value" id="mapStatIncidents">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🕳️</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Potholes</span>
+                            <span class="stat-value" id="mapStatPotholes">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Pending Reports</span>
+                            <span class="stat-value" id="mapStatPending">0</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="map-toolbar">
+                <div class="map-filter-buttons">
+                    <button type="button" class="map-filter-btn active" id="mapFilterAll" onclick="filterMapReports('all')">
+                        All Reports
+                    </button>
+                    <button type="button" class="map-filter-btn" id="mapFilterIncidents" onclick="filterMapReports('incidents')">
+                        🚨 Traffic Incidents
+                    </button>
+                    <button type="button" class="map-filter-btn" id="mapFilterPotholes" onclick="filterMapReports('potholes')">
+                        🕳️ Potholes
+                    </button>
+                </div>
+
+                <div class="map-legend">
+                    <span class="legend-item"><span class="legend-icon">🚨</span> Traffic Incident</span>
+                    <span class="legend-item"><span class="legend-icon">🕳️</span> Pothole</span>
+                    <span class="legend-item" style="border-left: 1px solid var(--border-color); padding-left: 0.5rem;"><span class="badge priority-high" style="font-size:0.7rem;">HIGH</span> High Priority</span>
+                    <span class="legend-item"><span class="badge priority-medium" style="font-size:0.7rem;">MEDIUM</span> Medium Priority</span>
+                    <span class="legend-item"><span class="badge priority-low" style="font-size:0.7rem; background-color:#dbeafe; color:#1d4ed8;">LOW</span> Low Priority</span>
+                </div>
+            </div>
+
+            <div class="map-wrapper">
+                <div id="cityMapContainer" class="city-map-container">
+                    <div class="map-grid-pattern"></div>
+                    
+                    <div class="map-road road-horizontal road-main1" title="Anna Salai / Mount Road">
+                        <span class="road-label">Mount Road (Anna Salai)</span>
+                    </div>
+                    <div class="map-road road-horizontal road-main2" title="Inner Ring Road">
+                        <span class="road-label">Inner Ring Road</span>
+                    </div>
+                    <div class="map-road road-vertical road-cross1" title="GST Road">
+                        <span class="road-label vertical-text">GST Road</span>
+                    </div>
+                    <div class="map-road road-vertical road-cross2" title="ECR / OMR Express Avenue">
+                        <span class="road-label vertical-text">OMR Express Way</span>
+                    </div>
+
+                    <div class="district-label" style="top: 25%; left: 25%;">Anna Nagar</div>
+                    <div class="district-label" style="top: 42%; left: 50%;">T. Nagar</div>
+                    <div class="district-label" style="top: 65%; left: 45%;">Guindy</div>
+                    <div class="district-label" style="top: 72%; left: 70%;">Velachery</div>
+                    <div class="district-label" style="top: 55%; left: 75%;">Adyar</div>
+                    <div class="district-label" style="top: 40%; left: 20%;">Koyambedu</div>
+
+                    <div id="mapPinsContainer"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- MODALS (EDIT, PHOTO & MAP DETAIL MODALS)   -->
+    <!-- ========================================== -->
+
+    <!-- 1. EDIT REPORT MODAL -->
+    <div id="editReportModal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">✏️ Edit Report: <span id="editModalReportId"></span></h3>
+                <button class="modal-close" onclick="closeEditModal()">&times;</button>
+            </div>
+            
+            <div id="editModalError" class="alert alert-error hidden"></div>
+
+            <form id="editReportForm" onsubmit="handleEditReportSubmit(event)">
+                <input type="hidden" id="editReportId">
+                <input type="hidden" id="editReportCategory">
+
+                <div class="form-grid">
+                    
+                    <div class="form-group" id="editGroupType">
+                        <label for="editType">Incident Type <span class="required">*</span></label>
+                        <select id="editType">
+                            <option value="Accident">Accident</option>
+                            <option value="Traffic Jam">Traffic Jam</option>
+                            <option value="Road Blockage">Road Blockage</option>
+                            <option value="Traffic Signal Failure">Traffic Signal Failure</option>
+                            <option value="Vehicle Breakdown">Vehicle Breakdown</option>
+                            <option value="Waterlogging">Waterlogging</option>
+                            <option value="Fire">Fire</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editLocation">Location <span class="required">*</span></label>
+                        <input type="text" id="editLocation" required>
+                    </div>
+
+                    <div class="form-group" id="editGroupSeverity">
+                        <label for="editSeverity">Severity <span class="required">*</span></label>
+                        <select id="editSeverity">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="editGroupVehicles">
+                        <label for="editVehicles">Vehicles Affected <span class="required">*</span></label>
+                        <input type="number" id="editVehicles" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editDate">Date <span class="required">*</span></label>
+                        <input type="date" id="editDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editTime">Time <span class="required">*</span></label>
+                        <input type="time" id="editTime" required>
+                    </div>
+
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="editDescription">Description <span class="required">*</span></label>
+                    <textarea id="editDescription" rows="4" required></textarea>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-submit">
+                        💾 Save Changes
+                    </button>
+                    <button type="button" class="btn btn-cancel" onclick="closeEditModal()">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. PHOTO LIGHTBOX ENLARGEMENT MODAL -->
+    <div id="photoModal" class="modal-overlay hidden" onclick="closePhotoModal()">
+        <div class="modal-photo-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title">📸 Pothole Photo Evidence</h3>
+                <button class="modal-close" onclick="closePhotoModal()">&times;</button>
+            </div>
+            <div class="photo-modal-body">
+                <img id="photoModalImg" src="" alt="Enlarged Pothole Photo Preview">
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MAP MARKER REPORT DETAIL MODAL (MODULE 6) -->
+    <div id="mapReportModal" class="modal-overlay hidden" onclick="closeMapReportModal()">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title" id="mapModalTitle">Report Details</h3>
+                <button class="modal-close" onclick="closeMapReportModal()">&times;</button>
+            </div>
+            <div id="mapModalBody" class="report-card-body" style="margin-bottom: 0;">
+                <!-- Dynamic Content Rendered via JavaScript -->
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeMapReportModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. REPORT STATUS TRACKING & TIMELINE MODAL (MODULE 8) -->
+    <div id="statusTimelineModal" class="modal-overlay hidden" onclick="closeStatusTimelineModal()">
+        <div class="modal-card modal-timeline-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title">📊 Report Status & Progress Timeline</h3>
+                    <div id="timelineReportSubHeader" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;"></div>
+                </div>
+                <button class="modal-close" onclick="closeStatusTimelineModal()">&times;</button>
+            </div>
+            
+            <div id="timelineSummaryHeader" class="timeline-summary-box">
+                <!-- Dynamic Summary Metadata (ID, Priority, Current Status) -->
+            </div>
+
+            <div id="timelineStepsContainer" class="timeline-steps-wrapper">
+                <!-- Dynamic Vertical Progress Steps Rendered via JavaScript -->
+            </div>
+
+            <div class="modal-buttons" style="margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeStatusTimelineModal()">Close Timeline</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. AUTHENTICATION (USER & ADMIN LOGIN / REGISTER) MODAL (MODULE 8) -->
+    <div id="authModal" class="modal-overlay hidden" onclick="closeAuthModal()">
+        <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 440px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="authModalTitle">🔑 Account Login</h3>
+                <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+            </div>
+            
+            <div class="auth-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                <button type="button" id="tabUserLogin" class="btn btn-sm btn-primary" onclick="switchAuthTab('userLogin')">User Login</button>
+                <button type="button" id="tabAdminLogin" class="btn btn-sm btn-outline" onclick="switchAuthTab('adminLogin')">Admin Login</button>
+                <button type="button" id="tabRegister" class="btn btn-sm btn-outline" onclick="switchAuthTab('register')">Register</button>
+            </div>
+
+            <div id="authModalError" class="alert alert-error hidden"></div>
+            <div id="authModalSuccess" class="alert alert-success hidden"></div>
+
+            <!-- Form: User Login -->
+            <form id="userLoginForm" onsubmit="handleUserLoginSubmit(event)">
+                <div class="form-group">
+                    <label for="userLoginEmail">Email Address <span class="required">*</span></label>
+                    <input type="email" id="userLoginEmail" placeholder="e.g. user@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="userLoginPassword">Password <span class="required">*</span></label>
+                    <input type="password" id="userLoginPassword" placeholder="Enter password" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-submit" style="width: 100%;">Login as User</button>
+                </div>
+            </form>
+
+            <!-- Form: Admin Login -->
+            <form id="adminLoginForm" class="hidden" onsubmit="handleAdminLoginSubmit(event)">
+                <div class="form-group">
+                    <label for="adminLoginEmail">Admin Email <span class="required">*</span></label>
+                    <input type="email" id="adminLoginEmail" placeholder="admin@smarttraffic.com" value="admin@smarttraffic.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminLoginPassword">Admin Password <span class="required">*</span></label>
+                    <input type="password" id="adminLoginPassword" placeholder="Enter admin password" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-submit" style="width: 100%; background-color: var(--primary-hover);">Login as Admin</button>
+                </div>
+            </form>
+
+            <!-- Form: User Register -->
+            <form id="userRegisterForm" class="hidden" onsubmit="handleUserRegisterSubmit(event)">
+                <div class="form-group">
+                    <label for="registerName">Full Name <span class="required">*</span></label>
+                    <input type="text" id="registerName" placeholder="e.g. John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email Address <span class="required">*</span></label>
+                    <input type="email" id="registerEmail" placeholder="e.g. user@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password <span class="required">*</span></label>
+                    <input type="password" id="registerPassword" placeholder="Choose password (min 6 chars)" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-submit" style="width: 100%;">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- FOOTER SECTION                             -->
+    <!-- ========================================== -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p class="footer-title">Smart Traffic Incident Reporter</p>
+            <p class="footer-sub">College Assignment Project</p>
+            <p class="footer-copy">&copy; 2026 Smart Traffic Team. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Single Report Dedicated Print Container -->
+    <div id="singleReportPrintContainer"></div>
+
+    <!-- Socket.IO Client Library (Module 16 Realtime Updates) -->
+    <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+    <!-- JavaScript File Link -->
+    <script src="script.js"></script>
+</body>
+</html>
